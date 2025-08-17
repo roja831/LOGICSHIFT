@@ -3,71 +3,62 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>LogicShift · CyberQuest Adventure</title>
-<meta name="theme-color" content="#0b1222"/>
+<title>LogicShift — CyberQuest Adventure (Full)</title>
+<meta name="theme-color" content="#071026"/>
 <style>
   :root{
-    --bg1:#081226; --bg2:#11203a; --accent:#ff6a6a; --muted:#9fb4ff; --panel:#0b1222;
-    --ok:#3be88d; --warn:#ffd166; --gold:#f7c948;
+    --bg1:#061026; --bg2:#0b1830; --accent:#ff7a6b; --muted:#9fb4ff; --panel:#071226;
+    --ok:#3be88d; --warn:#ffd166; --gold:#f7c948; --glass: rgba(255,255,255,0.03);
   }
   *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);color:#e6f0ff}
-  .wrap{max-width:980px;margin:0 auto;padding:14px}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#eaf3ff}
+  .wrap{max-width:1000px;margin:0 auto;padding:14px}
   header{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:8px}
   .brand{display:flex;align-items:center;gap:10px}
   .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#ff6a6a,#ffb86b);display:flex;align-items:center;justify-content:center;font-weight:800;color:#081226}
   h1{margin:0;font-size:18px}
-  p.caption{color:var(--muted);margin:6px 0 14px;font-size:13px}
+  .caption{color:var(--muted);margin:6px 0 14px;font-size:13px}
 
   /* HUD */
   .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-  .badge{background:rgba(255,255,255,0.04);padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);font-size:13px;color:var(--muted)}
-  .score{font-weight:700;color:#fff}
+  .badge{background:var(--glass);padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);font-size:13px;color:var(--muted)}
   .progress{flex:1;height:10px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
   .bar{height:100%;background:linear-gradient(90deg,#3be88d,#84fab0);width:0%}
-  .footerFixed{position:fixed;left:0;right:0;bottom:0;background:rgba(4,8,18,0.95);padding:10px 14px;border-top:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted)}
+  .footerFixed{position:fixed;left:0;right:0;bottom:0;background:rgba(3,6,12,0.95);padding:10px 14px;border-top:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);z-index:9999}
 
   /* Game area */
-  .stage{position:relative;height:62vh;border-radius:14px;overflow:hidden;background:
-    linear-gradient(#071026 0%, rgba(255,255,255,0.02) 60%);box-shadow:0 10px 30px #0008;padding:0}
-  /* parallax layers */
-  .layer{position:absolute;left:0;right:0;bottom:0;top:0;background-repeat:repeat-x;background-position:0 bottom;pointer-events:none}
-  .sky{background:linear-gradient(180deg,#0a1730 0%,#071026 100%);z-index:1}
-  .hills{background-image:radial-gradient(circle at 10% 40%, rgba(255,255,255,0.02) 0 2px, transparent 2px);opacity:0.08;z-index:2}
-  .ground{height:28%;bottom:0;background:linear-gradient(180deg,#0d1a2e,#071026);z-index:3}
-  /* path */
-  .path{position:absolute;left:0;right:0;bottom:6%;height:110px;z-index:4}
-  .path .road{position:absolute;left:0;right:0;bottom:0;height:60px;background:
-    linear-gradient(180deg,#0c1324,#09101a);opacity:0.9;border-top:1px solid rgba(255,255,255,0.02)}
+  .stage{position:relative;height:66vh;border-radius:14px;overflow:hidden;background:
+    linear-gradient(180deg,#071029 0%, rgba(255,255,255,0.02) 60%);box-shadow:0 10px 30px #0008}
+  /* parallax */
+  .bgStars{position:absolute;left:0;right:0;top:0;bottom:0;background-image:radial-gradient(rgba(255,255,255,0.02) 0.5px, transparent 0.6px);background-size:40px 40px;opacity:.08;z-index:1}
+  .ground{position:absolute;left:0;right:0;bottom:0;height:36%;background:linear-gradient(180deg,#071226,#081226);z-index:3;border-top:1px solid rgba(255,255,255,0.02)}
+  .field{position:absolute;left:3%;right:3%;bottom:8%;height:24%;z-index:4}
+  .grid{position:absolute;left:0;right:0;bottom:0;height:100%;background:
+    linear-gradient(transparent 60%, rgba(255,255,255,0.01) 61%), linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);background-size:40px 40px,40px 40px;opacity:0.04}
   /* character */
-  .character{position:absolute;bottom:18%;left:6%;width:84px;height:84px;z-index:6;transition:left 900ms linear,transform 200ms}
-  .character img{width:100%;height:100%}
-  /* keys shelf */
-  .keysShelf{position:absolute;top:10px;right:12px;z-index:8;text-align:right}
-  .keyIcon{display:inline-block;background:linear-gradient(180deg,#ffd86b,#ffb84d);color:#101018;padding:6px 10px;border-radius:999px;margin-left:6px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.4);font-size:14px}
-
-  /* controls panel */
-  .controls{display:flex;gap:10px;align-items:center;padding:12px;position:relative;z-index:9}
-  .btn{background:linear-gradient(90deg,#ff6a6a,#ff9a6a);border:none;padding:12px 14px;border-radius:12px;color:#081226;font-weight:800;cursor:pointer;font-size:15px;box-shadow:0 8px 18px rgba(0,0,0,0.45)}
-  .btn.secondary{background:rgba(255,255,255,0.03);color:var(--muted);font-weight:600}
-  .panel{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:linear-gradient(180deg,rgba(4,16,38,0.9),rgba(6,12,22,0.9));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);backdrop-filter: blur(6px);display:flex;gap:8px;align-items:center}
-  /* popup question box */
-  .popup{position:absolute;left:50%;top:10%;transform:translateX(-50%);width:92%;max-width:540px;background:linear-gradient(180deg,#061226,#071529);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.04);z-index:20;box-shadow:0 18px 40px rgba(0,0,0,0.6)}
+  .character{position:absolute;bottom:10%;left:6%;width:64px;height:80px;z-index:6;transition:left 450ms linear,transform 120ms}
+  .char-sprite{width:100%;height:100%;display:block}
+  /* key */
+  .key{position:absolute;width:52px;height:36px;z-index:7;transform-origin:center}
+  .key .badge{font-size:12px;padding:6px 8px;border-radius:8px;background:linear-gradient(180deg,#ffd86b,#ffb84d);color:#0b1020;font-weight:800;box-shadow:0 6px 16px rgba(0,0,0,0.4)}
+  /* controls */
+  .panel{display:flex;gap:8px;align-items:center;padding:12px;position:relative;z-index:9}
+  .btn{background:linear-gradient(90deg,#ff7a6b,#ffb86b);border:none;padding:10px 12px;border-radius:12px;color:#081226;font-weight:800;cursor:pointer}
+  .btn.secondary{background:rgba(255,255,255,0.03);color:var(--muted);font-weight:700}
+  .popup{position:absolute;left:50%;top:6%;transform:translateX(-50%);width:92%;max-width:520px;background:linear-gradient(180deg,#0b1226,#071429);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.04);z-index:20;box-shadow:0 18px 40px rgba(0,0,0,0.6)}
   .popup h3{margin:0 0 8px;font-size:16px}
   .popup p{margin:6px 0;color:var(--muted)}
   .popup input, .popup select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.3);color:#eaf3ff}
-  .badgeSmall{display:inline-block;background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:999px;margin-right:8px;color:var(--muted);font-size:13px}
-  .hidden{display:none}
-
-  /* report */
+  .small{font-size:13px;color:var(--muted)}
   .reportBox{padding:12px;background:linear-gradient(180deg,#06102a,#071429);border-radius:12px;border:1px solid rgba(255,255,255,0.03);color:#eaf3ff}
-  .reportBox h3{margin:0 0 6px}
-
-  /* responsive */
-  @media (max-width:520px){
-    .character{width:64px;height:64px}
-    .panel{flex-direction:column;gap:6px;padding:10px}
-    .btn{padding:10px 12px;font-size:14px}
+  .hidden{display:none}
+  /* mobile overlay controls */
+  .mobileControls{display:none;position:absolute;left:8px;bottom:12px;z-index:30;gap:8px}
+  .touchBtn{width:56px;height:56px;border-radius:10px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;border:1px solid rgba(255,255,255,0.02)}
+  @media (max-width:720px){
+    .character{width:54px;height:68px}
+    .mobileControls{display:flex;flex-direction:column}
+    .panel{position:static;margin:8px 12px 12px}
   }
 </style>
 </head>
@@ -78,92 +69,86 @@
       <div class="logo">LS</div>
       <div>
         <h1>LogicShift — CyberQuest Adventure</h1>
-        <div class="caption">Collect 5 keys across the field. Solve to unlock your <strong>Secret Report</strong>.</div>
+        <div class="caption">Reach keys across the field. Solve puzzles. Unlock your Secret Report.</div>
       </div>
     </div>
     <div class="hud">
       <div class="badge">Score: <span id="score">0</span></div>
-      <div class="badge">Keys: <span id="keys">0</span>/5</div>
-      <div class="progress" style="width:180px"><div id="bar" class="bar"></div></div>
+      <div class="badge">Keys: <span id="keys">0</span>/<span id="totalKeys">5</span></div>
+      <div class="progress" style="width:220px"><div id="bar" class="bar"></div></div>
     </div>
   </header>
 
   <main>
     <section class="stage" id="stage">
-      <div class="layer sky"></div>
-      <div class="layer hills"></div>
-      <div class="layer ground"></div>
+      <div class="bgStars"></div>
+      <div class="ground"></div>
 
-      <div class="path">
-        <div class="road"></div>
+      <div class="field" id="field">
+        <div class="grid"></div>
+        <!-- keys will be injected here -->
       </div>
 
-      <!-- animated walking character (SVG inline) -->
-      <div class="character" id="character" aria-hidden="true">
-        <!-- simple character SVG -->
-        <img id="charImg" src="data:image/svg+xml;utf8,
-          <svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'>
-            <g>
-              <circle cx='100' cy='60' r='28' fill='%23ffd86b' />
-              <rect x='70' y='88' width='60' height='60' rx='12' ry='12' fill='%234a90e2' />
-              <rect x='80' y='130' width='16' height='36' rx='6' fill='%231a2b46' />
-              <rect x='104' y='130' width='16' height='36' rx='6' fill='%231a2b46' />
-              <circle cx='90' cy='55' r='4' fill='%23021' />
-              <circle cx='110' cy='55' r='4' fill='%23021' />
-            </g>
-          </svg>" alt="avatar" />
+      <div class="character" id="character" tabindex="0" aria-label="player">
+        <!-- inline simple sprite (SVG) -->
+        <svg class="char-sprite" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <circle cx="50" cy="28" r="14" fill="#ffd86b"/>
+            <rect x="32" y="44" width="36" height="32" rx="6" fill="#4a90e2"/>
+            <rect x="38" y="78" width="8" height="24" rx="3" fill="#111827"/>
+            <rect x="54" y="78" width="8" height="24" rx="3" fill="#111827"/>
+            <circle cx="46" cy="26" r="2.2" fill="#081226"/>
+            <circle cx="54" cy="26" r="2.2" fill="#081226"/>
+          </g>
+        </svg>
       </div>
 
-      <!-- keys visual -->
-      <div class="keysShelf" id="keysShelf" aria-hidden="true">
-        <!-- keys rendered here -->
+      <div id="keysShelf" style="position:absolute;top:12px;left:12px;z-index:50"></div>
+
+      <div class="panel" style="position:absolute;right:14px;top:12px;z-index:50">
+        <button id="enterGateBtn" class="btn">Enter Game Code</button>
+        <button id="moveBtn" class="btn secondary">Move</button>
+        <button id="hintBtn" class="btn secondary">Hint</button>
       </div>
 
-      <!-- controls -->
-      <div class="panel" role="region" aria-label="controls">
-        <div class="controls">
-          <button id="enterGateBtn" class="btn">Enter Game Code</button>
-          <button id="moveBtn" class="btn secondary">Move / Interact</button>
-          <button id="hintBtn" class="btn secondary">Hint (-2 pts)</button>
+      <div class="mobileControls" id="mobileControls" aria-hidden="true">
+        <div style="display:flex;gap:8px">
+          <button class="touchBtn" id="leftBtn">◀</button>
+          <button class="touchBtn" id="upBtn">▲</button>
+          <button class="touchBtn" id="rightBtn">▶</button>
         </div>
       </div>
 
-      <!-- popup question -->
       <div id="popup" class="popup hidden" role="dialog" aria-modal="true">
-        <h3 id="qTitle">Level</h3>
-        <p id="qText">Question here</p>
+        <h3 id="qTitle">Challenge</h3>
+        <p id="qText">Question</p>
         <div id="answerArea">
-          <input id="qInput" placeholder="Type answer or select...">
+          <input id="qInput" placeholder="Type answer or choose...">
         </div>
-        <div style="height:8px"></div>
+        <div style="height:10px"></div>
         <div style="display:flex;gap:8px">
           <button id="submitBtn" class="btn">Submit</button>
           <button id="closeBtn" class="btn secondary">Close</button>
         </div>
-        <p id="popupMsg" style="color:var(--muted);margin-top:8px;font-size:13px"></p>
+        <p id="popupMsg" class="small" style="margin-top:8px"></p>
       </div>
     </section>
 
-    <!-- bottom info / report -->
     <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
-      <div style="flex:1" class="card">
-        <div class="reportBox" id="reportPreview">
-          <h3>Secret Report Preview</h3>
-          <p id="previewText" style="color:var(--muted)">Unlock all 5 keys to generate your personalized report.</p>
-        </div>
+      <div style="flex:1" class="reportBox">
+        <h3>Secret Report Preview</h3>
+        <p id="previewText" class="small">Collect all keys to generate your personalized report.</p>
       </div>
 
-      <div style="width:300px" class="card">
-        <div style="padding:10px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><strong>Timer</strong></div>
-            <div id="time">00:00</div>
-          </div>
-          <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:10px 0">
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button id="downloadBtn" class="btn secondary" style="flex:1">Download Report</button>
-            <button id="resetBtn" class="btn secondary" style="flex:1">Restart</button>
-          </div>
+      <div style="width:300px" class="reportBox">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Timer</strong></div>
+          <div id="time">00:00</div>
+        </div>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:10px 0">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="downloadBtn" class="btn secondary" style="flex:1">Download Report</button>
+          <button id="resetBtn" class="btn secondary" style="flex:1">Restart</button>
         </div>
       </div>
     </div>
@@ -172,43 +157,47 @@
 
 <div class="footerFixed">
   <div style="display:flex;gap:10px;align-items:center">
-    <div class="badgeSmall">Status: <span id="status">Locked</span></div>
-    <div class="badgeSmall">Hints: <span id="hints">0</span></div>
+    <div class="badge">Status: <span id="status">Locked</span></div>
+    <div class="badge">Hints: <span id="hints">0</span></div>
   </div>
   <div style="display:flex;gap:10px;align-items:center">
-    <div class="badgeSmall">Final Score: <strong id="finalScore">0</strong></div>
+    <div class="badge">Final Score: <strong id="finalScore">0</strong></div>
   </div>
 </div>
 
 <script>
-/* ------------------- CONFIG ------------------- */
-const GAME_CODE = "CYBER2025";        // change as needed
+/* ---------------- CONFIG ---------------- */
+const GAME_CODE = "CYBER2025";    // change for event
 const TOTAL_KEYS = 5;
+
+/* QUESTIONS: customize as you want. 'type' can be 'text' or 'choice' with choices array. */
 const QUESTIONS = [
-  { id:1, type:"text", q:"Decode (apply ROT13 then ROT7): ZOL WVIVTVM LU AOL QBLKLZ", a:"THE FUTURE OF THE JUDGES" },
+  { id:1, type:"text", q:"Decode (ROT13 → ROT7): ZOL WVIVTVM LU AOL QBLKLZ", a:"THE FUTURE OF THE JUDGES" },
   { id:2, type:"choice", q:"I speak in 0s and 1s but dream in colors. Without me, your code is meaningless. What am I?", choices:["Interpreter","Compiler","Assembler","Linker"], a:"Compiler" },
-  { id:3, type:"text", q:"Fix the bug: what's the correct output of factorial(5)?\n(def factorial(n): if n==0: return 0 else: return n*factorial(n-1))", a:"120" },
-  { id:4, type:"text", q:"Binary puzzle: What is binary 1010 in decimal?", a:"10" },
-  { id:5, type:"text", q:"Shortcut key for copy on Windows (write exactly):", a:"CTRL+C" }
+  { id:3, type:"text", q:"Fix the bug: what's factorial(5) output? (base case must be 1)", a:"120" },
+  { id:4, type:"text", q:"Binary puzzle: what is binary 1010 in decimal?", a:"10" },
+  { id:5, type:"text", q:"Keyboard shortcut to copy on Windows (write exactly):", a:"CTRL+C" }
 ];
-/* ------------------- STATE ------------------- */
+/* --------------------------------------- */
+
+/* state */
 let state = {
   unlocked:false,
-  posIndex:0,          // 0..TOTAL_KEYS-1 stops
-  keys:0,
+  xPct:6,            // left% for character
+  keyPositions:[],   // array of {xPct,yPct, id}
+  keysFound:0,
   score:0,
   moves:0,
   hints:0,
   startTime:null,
-  timerId:null
+  timerId:null,
+  currentKey:null  // active key id
 };
-/* ------------------- UI refs ------------------- */
+
+/* DOM refs */
 const $ = id => document.getElementById(id);
 const character = $("character");
-const bar = $("bar");
-const statusEl = $("status");
-const scoreEl = $("score");
-const keysEl = $("keys");
+const field = $("field");
 const popup = $("popup");
 const qTitle = $("qTitle");
 const qText = $("qText");
@@ -217,19 +206,33 @@ const submitBtn = $("submitBtn");
 const closeBtn = $("closeBtn");
 const popupMsg = $("popupMsg");
 const previewText = $("previewText");
-const timeEl = $("time");
-const hintsEl = $("hints");
-const finalScoreEl = $("finalScore");
 const keysShelf = $("keysShelf");
 
-/* ------------------- UTILS ------------------- */
+/* sound helper using WebAudio */
+const audioCtx = (typeof AudioContext !== 'undefined') ? new AudioContext() : null;
+function beep(freq=800,dur=0.08){
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.frequency.value = freq;
+  o.type = "sine";
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.01);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+  o.stop(audioCtx.currentTime + dur + 0.02);
+}
+
+/* helpers UI */
 function updateHUD(){
-  scoreEl.textContent = state.score;
-  keysEl.textContent = state.keys + "/" + TOTAL_KEYS;
-  bar.style.width = (state.keys / TOTAL_KEYS * 100) + "%";
-  statusEl.textContent = state.unlocked ? `Stage ${state.posIndex+1}` : "Locked";
-  hintsEl.textContent = state.hints;
-  finalScoreEl.textContent = state.score;
+  $("score").textContent = state.score;
+  $("keys").textContent = state.keysFound;
+  $("bar").style.width = (state.keysFound / TOTAL_KEYS * 100) + "%";
+  $("status").textContent = state.unlocked ? `Stage ${state.keysFound+1}` : "Locked";
+  $("hints").textContent = state.hints;
+  $("finalScore").textContent = state.score;
 }
 function startTimer(){
   if(state.startTime) return;
@@ -238,180 +241,260 @@ function startTimer(){
     const s = Math.floor((Date.now() - state.startTime)/1000);
     const mm = String(Math.floor(s/60)).padStart(2,"0");
     const ss = String(s%60).padStart(2,"0");
-    timeEl.textContent = `${mm}:${ss}`;
-  },400);
+    $("time").textContent = `${mm}:${ss}`;
+  },300);
 }
-function stopTimer(){
-  if(state.timerId) { clearInterval(state.timerId); state.timerId=null; }
-}
+function stopTimer(){ if(state.timerId){ clearInterval(state.timerId); state.timerId = null; } }
 
-/* ------------------- GATE ------------------- */
-document.getElementById("enterGateBtn").addEventListener("click", ()=>{
+/* gate */
+$("enterGateBtn").addEventListener("click", ()=>{
   const code = prompt("Enter Game Code:");
   if(!code) return;
   if(code.trim().toUpperCase() === GAME_CODE.toUpperCase()){
     state.unlocked = true;
-    statusEl.textContent = "Ready";
-    alert("Access granted. Use Move / Interact to start walking.");
+    alert("Access granted. Use Move to walk toward a key. Tap keys to solve puzzles.");
     startTimer();
+    spawnKeys();
     updateHUD();
+    beep(900,0.06);
   } else {
     alert("Access denied. Ask host for the code.");
+    beep(200,0.06);
   }
 });
 
-/* ------------------- MOVE / INTERACT ------------------- */
-document.getElementById("moveBtn").addEventListener("click", ()=>{
-  if(!state.unlocked){ alert("Please enter game code first."); return; }
-  // if finished
-  if(state.keys >= TOTAL_KEYS){
-    alert("You already collected all keys. View your report or download it.");
+/* spawn keys randomly on the field (avoid edges) */
+function spawnKeys(){
+  state.keyPositions = [];
+  field.innerHTML = '<div class="grid"></div>'; // reset
+  for(let i=0;i<TOTAL_KEYS;i++){
+    // random positions within field bounds (in px later mapped), but we store percent
+    const xPct = 8 + Math.random()*80; // 8%..88%
+    const yPct = 12 + Math.random()*56; // 12%..68% (relative to field)
+    const id = `K${i+1}`;
+    state.keyPositions.push({id,xPct,yPct,claimed:false});
+    const el = document.createElement("div");
+    el.className = "key";
+    el.id = id;
+    el.style.left = `calc(${xPct}% - 26px)`; // center adjustments
+    el.style.bottom = `${yPct}%`;
+    el.innerHTML = `<div class="badge">KEY</div>`;
+    el.addEventListener("click",(e)=>{ e.stopPropagation(); onKeyClick(id); });
+    field.appendChild(el);
+  }
+}
+
+/* show keys shelf (collected) */
+function renderKeysShelf(){
+  keysShelf.innerHTML = "";
+  for(let i=0;i<state.keysFound;i++){
+    const s = document.createElement("span");
+    s.className = "badge";
+    s.style.background = "linear-gradient(180deg,#ffd86b,#ffb84d)";
+    s.style.color = "#071226";
+    s.textContent = "KEY";
+    s.style.marginRight = "6px";
+    keysShelf.appendChild(s);
+  }
+}
+
+/* movement: Move button moves character forward one step (and touches nearby keys) */
+$("moveBtn").addEventListener("click", ()=>{
+  if(!state.unlocked){ alert("Enter game code first."); return; }
+  // move in increments left->right
+  state.xPct = Math.min(92, state.xPct + 14); // step 14%
+  character.style.left = state.xPct + "%";
+  state.moves++;
+  beep(700,0.06);
+  // check proximity to any key (distance by pct)
+  checkProximity();
+  updateHUD();
+});
+
+/* keyboard & mobile controls */
+document.addEventListener("keydown",(e)=>{
+  if(!state.unlocked) return;
+  const k = e.key;
+  if(k === "ArrowRight" || k==="d"){ state.xPct = Math.min(92, state.xPct + 6); character.style.left = state.xPct + "%"; state.moves++; checkProximity(); beep(700,0.04); updateHUD(); }
+  if(k === "ArrowLeft" || k==="a"){ state.xPct = Math.max(4, state.xPct - 6); character.style.left = state.xPct + "%"; state.moves++; checkProximity(); beep(600,0.04); updateHUD(); }
+});
+$("leftBtn")?.addEventListener("click", ()=>{ if(state.unlocked){ state.xPct = Math.max(4, state.xPct - 6); character.style.left = state.xPct + "%"; checkProximity(); updateHUD(); }});
+$("rightBtn")?.addEventListener("click", ()=>{ if(state.unlocked){ state.xPct = Math.min(92, state.xPct + 6); character.style.left = state.xPct + "%"; checkProximity(); updateHUD(); }});
+$("upBtn")?.addEventListener("click", ()=>{ if(state.unlocked){ /* reserved for future */ } });
+
+/* check proximity to keys: if close, auto-open puzzle */
+function checkProximity(){
+  // compute character center relative pct
+  const cx = state.xPct;
+  // iterate keys
+  for(const kp of state.keyPositions){
+    if(kp.claimed) continue;
+    const dx = Math.abs(cx - kp.xPct);
+    // if within 8% horizontally, show prompt to interact
+    if(dx <= 8){
+      // open popup for this key
+      onKeyClick(kp.id);
+      return;
+    }
+  }
+}
+
+/* key click -> show puzzle for that key's index */
+function onKeyClick(keyId){
+  if(!state.unlocked) return;
+  const idx = state.keyPositions.findIndex(k=>k.id===keyId);
+  if(idx === -1) return;
+  const kp = state.keyPositions[idx];
+  if(kp.claimed){
+    popupMsg.textContent = "You've already collected this key.";
+    popup.classList.remove("hidden");
+    setTimeout(()=>popup.classList.add("hidden"),1000);
     return;
   }
-  // move character visually
-  state.posIndex = Math.min(TOTAL_KEYS-1, state.posIndex + 1);
-  const leftPct = 6 + state.posIndex * (84 / (TOTAL_KEYS)); // approximate
-  character.style.left = leftPct + "%";
-  state.moves++;
-  updateHUD();
-  // after move show question for this stage (index)
-  setTimeout(()=>showQuestion(state.posIndex), 900);
-});
+  state.currentKey = idx;
+  showQuestion(idx);
+}
 
-/* ------------------- SHOW QUESTION ------------------- */
+/* showQuestion displays popup based on QUESTIONS[index] */
 function showQuestion(index){
   const q = QUESTIONS[index];
   qTitle.textContent = `Challenge ${index+1}`;
   qText.textContent = q.q;
   popupMsg.textContent = "";
+  // choose input type
   if(q.type === "choice"){
-    // create select
-    qInput.value = "";
-    qInput.outerHTML = `<select id="qInput">${q.choices.map(c=>`<option value="">-- select --</option>`).join('')}</select>`;
-    const sel = $("qInput");
-    sel.innerHTML = q.choices.map(c=>`<option>${c}</option>`).join("");
+    // build select
+    const sel = document.createElement("select");
+    sel.id = "qInput";
+    sel.innerHTML = `<option value="">-- select --</option>` + q.choices.map(c=>`<option>${c}</option>`).join("");
+    const area = $("answerArea");
+    area.innerHTML = "";
+    area.appendChild(sel);
   } else {
-    // text input
-    qInput.outerHTML = `<input id="qInput" placeholder="Type your answer here">`;
-    $("qInput").value = "";
+    const inp = document.createElement("input");
+    inp.id = "qInput";
+    inp.placeholder = "Type your answer...";
+    area = $("answerArea");
+    area.innerHTML = "";
+    area.appendChild(inp);
   }
   popup.classList.remove("hidden");
 }
 
-/* ------------------- SUBMIT / CHECK ------------------- */
+/* submit check */
 submitBtn.addEventListener("click", ()=>{
-  const idx = state.posIndex;
+  const idx = state.currentKey;
+  if(idx === null || idx === undefined) { popupMsg.textContent = "No active challenge."; return; }
   const q = QUESTIONS[idx];
   const raw = $("qInput").value || "";
   const ans = raw.trim().toUpperCase();
   if(!ans){ popupMsg.textContent = "Please enter an answer."; return; }
-  // check correctness
   if(ans === q.a.toUpperCase()){
-    // success: award key, points
-    state.keys++;
-    state.score += 10;
+    // success
+    state.keyPositions[idx].claimed = true;
+    // hide the key from field visually
+    const keyEl = $(state.keyPositions[idx].id);
+    if(keyEl) keyEl.style.display = "none";
+    state.keysFound++;
+    state.score += 12;
+    beep(1200,0.08);
     popupMsg.innerHTML = `<span style="color:var(--ok)">Correct! Key obtained 🎉</span>`;
-    renderKey(state.keys);
     popup.classList.add("hidden");
+    renderKeysShelf();
     updatePreview();
     updateHUD();
-    if(state.keys >= TOTAL_KEYS){
-      finishGame();
+    // store final report if done
+    if(state.keysFound >= TOTAL_KEYS){
+      setTimeout(finishGame,500);
     } else {
-      setTimeout(()=>{ alert("Proceed to the next move to continue."); }, 350);
+      setTimeout(()=>alert("Key added! Move to another spot to find more."), 350);
     }
   } else {
-    state.score = Math.max(0, state.score - 1);
+    state.score = Math.max(0, state.score - 2);
     popupMsg.innerHTML = `<span style="color:var(--warn)">Incorrect. Try again.</span>`;
     updateHUD();
+    beep(220,0.06);
   }
 });
 
+/* close popup */
 closeBtn.addEventListener("click", ()=> popup.classList.add("hidden"));
 
-/* ------------------- HINTS ------------------- */
-document.getElementById("hintBtn").addEventListener("click", ()=>{
-  if(!state.unlocked){ alert("Unlock the gate first"); return; }
-  if(state.keys >= TOTAL_KEYS){ alert("No hints needed — you finished!"); return; }
-  const idx = state.posIndex;
+/* hint button */
+$("hintBtn").addEventListener("click", ()=>{
+  if(!state.unlocked){ alert("Enter game code first."); return; }
+  if(state.currentKey == null){ alert("Move near a key and open its puzzle to use a hint."); return; }
+  const idx = state.currentKey;
   const q = QUESTIONS[idx];
-  const confirmed = confirm("Use hint? This costs -2 points.");
-  if(!confirmed) return;
-  state.hints++; state.score = Math.max(0, state.score - 2);
-  let hintText = "Think about basic transformations.";
-  // simple tailored hints
-  if(q.id === 1) hintText = "Apply ROT13, then ROT7. Keep spaces.";
-  if(q.id === 2) hintText = "It translates high-level code to machine/binary before running.";
-  if(q.id === 3) hintText = "Recursion base case should return 1 for factorial.";
-  if(q.id === 4) hintText = "Binary 1010 is 8+2.";
-  if(q.id === 5) hintText = "Common Windows keyboard shortcut (Control + ?).";
-  popupMsg.innerHTML = `<span style="color:var(--muted)">${hintText}</span>`;
+  if(!confirm("Use a hint? This costs -3 points.")) return;
+  state.hints++; state.score = Math.max(0, state.score - 3);
+  let hintText = "Think about patterns.";
+  if(q.id === 1) hintText = "Apply ROT13 first (A↔N) then ROT7 (shift letters by 7).";
+  if(q.id === 2) hintText = "It converts high-level programs into machine code before execution.";
+  if(q.id === 3) hintText = "Base case of factorial must return 1 (not 0).";
+  if(q.id === 4) hintText = "Binary 1010 = 8 + 2.";
+  if(q.id === 5) hintText = "Control + C.";
+  popupMsg.textContent = hintText;
   updateHUD();
 });
 
-/* ------------------- KEYS VISUAL ------------------- */
-function renderKey(count){
+/* render keys shelf visual */
+function renderKeysShelf(){
   keysShelf.innerHTML = "";
-  for(let i=0;i<count;i++){
-    const el = document.createElement("span");
-    el.className = "keyIcon";
-    el.textContent = "KEY";
-    keysShelf.appendChild(el);
+  for(let i=0;i<state.keysFound;i++){
+    const s = document.createElement("span");
+    s.className = "badge";
+    s.style.background = "linear-gradient(180deg,#ffd86b,#ffb84d)";
+    s.style.color = "#071226";
+    s.style.fontWeight = "800";
+    s.textContent = "KEY";
+    s.style.marginRight = "6px";
+    keysShelf.appendChild(s);
   }
 }
 
-/* ------------------- PREVIEW / REPORT ------------------- */
-function updatePreview(){
-  previewText.textContent = `Keys collected: ${state.keys}/${TOTAL_KEYS}. Score: ${state.score}. Moves: ${state.moves}. Hints: ${state.hints}.`;
-}
-
-/* ------------------- FINISH / REPORT GENERATION ------------------- */
+/* finish game - generate report */
 function finishGame(){
   stopTimer();
-  statusEl.textContent = "Escaped!";
-  // lightweight analysis - personalize
-  const secs = Math.floor((Date.now() - state.startTime)/1000);
-  const logicRating = state.score >= 40 ? "Excellent" : state.score >= 30 ? "Strong" : "Developing";
-  const debugRating = state.moves <= (TOTAL_KEYS*2) ? "Fast & Accurate" : "Needs practice";
-  const tip = [
+  status = $("status");
+  status.textContent = "Escaped!";
+  // compute stats
+  const secs = Math.floor((Date.now()-state.startTime)/1000);
+  const logicRating = state.score >= (TOTAL_KEYS*10) ? "Excellent" : state.score >= (TOTAL_KEYS*6) ? "Strong" : "Developing";
+  const debugRating = state.moves <= (TOTAL_KEYS*3) ? "Fast & Accurate" : "Needs practice";
+  const tipset = [
     "Explain your approach before coding in interviews.",
-    "Practice tracing code by hand to speed debugging.",
-    "Learn common ciphers (ROT, Base64) & practice.",
-    "Timebox problems: move if stuck for 90 seconds."
-  ][(state.hints + state.moves + secs) % 4];
-
+    "Trace outputs on paper before running code.",
+    "Practice ROT and Base64 patterns for quick decoding.",
+    "If stuck >90s, try a different angle (timebox)."
+  ];
+  const tip = tipset[(state.hints + state.moves + secs) % tipset.length];
+  const name = prompt("Enter name for your Secret Report (optional):") || "Anonymous";
   const report = {
-    name: prompt("Enter your name for the report (optional):") || "Anonymous",
-    score: state.score,
-    keys: state.keys,
-    time: timeEl.textContent,
-    moves: state.moves,
-    hints: state.hints,
-    strengths: {logic:logicRating,debug:debugRating},
-    tip
+    name, score: state.score, keys: state.keysFound, time:$("time").textContent, moves: state.moves, hints: state.hints,
+    strengths:{logic:logicRating,debug:debugRating}, tip
   };
-
-  // show report preview nicely
+  // display in preview
   previewText.innerHTML = `
     <strong>${report.name}</strong><br>
-    Final Score: <strong>${report.score}</strong> · Time: <strong>${report.time}</strong><br>
-    Keys collected: ${report.keys} · Moves: ${report.moves} · Hints used: ${report.hints}<br>
+    Score: <strong>${report.score}</strong> · Time: <strong>${report.time}</strong><br>
+    Keys: ${report.keys} · Moves: ${report.moves} · Hints: ${report.hints}<br>
     <h4 style="margin:8px 0 4px">Strengths</h4>
     Logic: ${report.strengths.logic} · Debugging: ${report.strengths.debug}
     <h4 style="margin:8px 0 4px">Personal Tip</h4>
     <em>${report.tip}</em>
-    <div style="margin-top:10px;color:var(--muted)">You can download the full report as a text file.</div>
+    <div style="margin-top:10px;color:var(--muted)">Use Download Report to save this result.</div>
   `;
-  // store final report for download
   window._finalReport = report;
   updateHUD();
-  alert("🎉 Vault opened! Your secret report is ready in the lower panel. Use Download Report to save.");
+  beep(1500,0.12);
+  alert("🎉 Vault opened! Your Secret Report is ready in the preview. Tap Download to save.");
 }
 
-/* ------------------- DOWNLOAD REPORT ------------------- */
+/* download txt report */
 $("downloadBtn").addEventListener("click", ()=>{
   const r = window._finalReport;
-  if(!r){ alert("Finish the game to generate your report."); return; }
+  if(!r){ alert("Finish the game to generate the report."); return; }
   const txt = [
     `LogicShift — Secret Report`,
     `Name: ${r.name}`,
@@ -427,22 +510,26 @@ $("downloadBtn").addEventListener("click", ()=>{
   ].join("\n");
   const blob = new Blob([txt], {type:'text/plain'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `LogicShift_report_${(r.name||'player').replace(/\s+/g,'_')}.txt`;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
+  const a = document.createElement("a");
+  a.href = url; a.download = `LogicShift_Report_${(r.name||'player').replace(/\s+/g,'_')}.txt`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 });
 
-/* ------------------- RESET ------------------- */
+/* reset */
 $("resetBtn").addEventListener("click", ()=> {
-  if(!confirm("Restart the game? Progress will be lost.")) return;
-  location.reload();
+  if(confirm("Restart game? Progress will be lost.")) location.reload();
 });
 
-/* ------------------- INIT ------------------- */
-updateHUD();
-updatePreview();
+/* init: place character and prepare */
+function init(){
+  character.style.left = state.xPct + "%";
+  // expose mobile controls if touch device
+  if('ontouchstart' in window) $("mobileControls").style.display = "flex";
+  // initial spawn only after unlocking; but we can create placeholders
+  updateHUD();
+}
+init();
+
 </script>
 </body>
 </html>
