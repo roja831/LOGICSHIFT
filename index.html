@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LogicShift · CyberQuest Adventure</title>
+<meta name="theme-color" content="#0b1222"/>
+<style>
+  :root{
+    --bg1:#081226; --bg2:#11203a; --accent:#ff6a6a; --muted:#9fb4ff; --panel:#0b1222;
+    --ok:#3be88d; --warn:#ffd166; --gold:#f7c948;
+  }
+  *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);color:#e6f0ff}
+  .wrap{max-width:980px;margin:0 auto;padding:14px}
+  header{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:8px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#ff6a6a,#ffb86b);display:flex;align-items:center;justify-content:center;font-weight:800;color:#081226}
+  h1{margin:0;font-size:18px}
+  p.caption{color:var(--muted);margin:6px 0 14px;font-size:13px}
+
+  /* HUD */
+  .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .badge{background:rgba(255,255,255,0.04);padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);font-size:13px;color:var(--muted)}
+  .score{font-weight:700;color:#fff}
+  .progress{flex:1;height:10px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
+  .bar{height:100%;background:linear-gradient(90deg,#3be88d,#84fab0);width:0%}
+  .footerFixed{position:fixed;left:0;right:0;bottom:0;background:rgba(4,8,18,0.95);padding:10px 14px;border-top:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted)}
+
+  /* Game area */
+  .stage{position:relative;height:62vh;border-radius:14px;overflow:hidden;background:
+    linear-gradient(#071026 0%, rgba(255,255,255,0.02) 60%);box-shadow:0 10px 30px #0008;padding:0}
+  /* parallax layers */
+  .layer{position:absolute;left:0;right:0;bottom:0;top:0;background-repeat:repeat-x;background-position:0 bottom;pointer-events:none}
+  .sky{background:linear-gradient(180deg,#0a1730 0%,#071026 100%);z-index:1}
+  .hills{background-image:radial-gradient(circle at 10% 40%, rgba(255,255,255,0.02) 0 2px, transparent 2px);opacity:0.08;z-index:2}
+  .ground{height:28%;bottom:0;background:linear-gradient(180deg,#0d1a2e,#071026);z-index:3}
+  /* path */
+  .path{position:absolute;left:0;right:0;bottom:6%;height:110px;z-index:4}
+  .path .road{position:absolute;left:0;right:0;bottom:0;height:60px;background:
+    linear-gradient(180deg,#0c1324,#09101a);opacity:0.9;border-top:1px solid rgba(255,255,255,0.02)}
+  /* character */
+  .character{position:absolute;bottom:18%;left:6%;width:84px;height:84px;z-index:6;transition:left 900ms linear,transform 200ms}
+  .character img{width:100%;height:100%}
+  /* keys shelf */
+  .keysShelf{position:absolute;top:10px;right:12px;z-index:8;text-align:right}
+  .keyIcon{display:inline-block;background:linear-gradient(180deg,#ffd86b,#ffb84d);color:#101018;padding:6px 10px;border-radius:999px;margin-left:6px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.4);font-size:14px}
+
+  /* controls panel */
+  .controls{display:flex;gap:10px;align-items:center;padding:12px;position:relative;z-index:9}
+  .btn{background:linear-gradient(90deg,#ff6a6a,#ff9a6a);border:none;padding:12px 14px;border-radius:12px;color:#081226;font-weight:800;cursor:pointer;font-size:15px;box-shadow:0 8px 18px rgba(0,0,0,0.45)}
+  .btn.secondary{background:rgba(255,255,255,0.03);color:var(--muted);font-weight:600}
+  .panel{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:linear-gradient(180deg,rgba(4,16,38,0.9),rgba(6,12,22,0.9));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);backdrop-filter: blur(6px);display:flex;gap:8px;align-items:center}
+  /* popup question box */
+  .popup{position:absolute;left:50%;top:10%;transform:translateX(-50%);width:92%;max-width:540px;background:linear-gradient(180deg,#061226,#071529);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.04);z-index:20;box-shadow:0 18px 40px rgba(0,0,0,0.6)}
+  .popup h3{margin:0 0 8px;font-size:16px}
+  .popup p{margin:6px 0;color:var(--muted)}
+  .popup input, .popup select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.3);color:#eaf3ff}
+  .badgeSmall{display:inline-block;background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:999px;margin-right:8px;color:var(--muted);font-size:13px}
+  .hidden{display:none}
+
+  /* report */
+  .reportBox{padding:12px;background:linear-gradient(180deg,#06102a,#071429);border-radius:12px;border:1px solid rgba(255,255,255,0.03);color:#eaf3ff}
+  .reportBox h3{margin:0 0 6px}
+
+  /* responsive */
+  @media (max-width:520px){
+    .character{width:64px;height:64px}
+    .panel{flex-direction:column;gap:6px;padding:10px}
+    .btn{padding:10px 12px;font-size:14px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">LS</div>
+      <div>
+        <h1>LogicShift — CyberQuest Adventure</h1>
+        <div class="caption">Collect 5 keys across the field. Solve to unlock your <strong>Secret Report</strong>.</div>
+      </div>
+    </div>
+    <div class="hud">
+      <div class="badge">Score: <span id="score">0</span></div>
+      <div class="badge">Keys: <span id="keys">0</span>/5</div>
+      <div class="progress" style="width:180px"><div id="bar" class="bar"></div></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage" id="stage">
+      <div class="layer sky"></div>
+      <div class="layer hills"></div>
+      <div class="layer ground"></div>
+
+      <div class="path">
+        <div class="road"></div>
+      </div>
+
+      <!-- animated walking character (SVG inline) -->
+      <div class="character" id="character" aria-hidden="true">
+        <!-- simple character SVG -->
+        <img id="charImg" src="data:image/svg+xml;utf8,
+          <svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'>
+            <g>
+              <circle cx='100' cy='60' r='28' fill='%23ffd86b' />
+              <rect x='70' y='88' width='60' height='60' rx='12' ry='12' fill='%234a90e2' />
+              <rect x='80' y='130' width='16' height='36' rx='6' fill='%231a2b46' />
+              <rect x='104' y='130' width='16' height='36' rx='6' fill='%231a2b46' />
+              <circle cx='90' cy='55' r='4' fill='%23021' />
+              <circle cx='110' cy='55' r='4' fill='%23021' />
+            </g>
+          </svg>" alt="avatar" />
+      </div>
+
+      <!-- keys visual -->
+      <div class="keysShelf" id="keysShelf" aria-hidden="true">
+        <!-- keys rendered here -->
+      </div>
+
+      <!-- controls -->
+      <div class="panel" role="region" aria-label="controls">
+        <div class="controls">
+          <button id="enterGateBtn" class="btn">Enter Game Code</button>
+          <button id="moveBtn" class="btn secondary">Move / Interact</button>
+          <button id="hintBtn" class="btn secondary">Hint (-2 pts)</button>
+        </div>
+      </div>
+
+      <!-- popup question -->
+      <div id="popup" class="popup hidden" role="dialog" aria-modal="true">
+        <h3 id="qTitle">Level</h3>
+        <p id="qText">Question here</p>
+        <div id="answerArea">
+          <input id="qInput" placeholder="Type answer or select...">
+        </div>
+        <div style="height:8px"></div>
+        <div style="display:flex;gap:8px">
+          <button id="submitBtn" class="btn">Submit</button>
+          <button id="closeBtn" class="btn secondary">Close</button>
+        </div>
+        <p id="popupMsg" style="color:var(--muted);margin-top:8px;font-size:13px"></p>
+      </div>
+    </section>
+
+    <!-- bottom info / report -->
+    <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+      <div style="flex:1" class="card">
+        <div class="reportBox" id="reportPreview">
+          <h3>Secret Report Preview</h3>
+          <p id="previewText" style="color:var(--muted)">Unlock all 5 keys to generate your personalized report.</p>
+        </div>
+      </div>
+
+      <div style="width:300px" class="card">
+        <div style="padding:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Timer</strong></div>
+            <div id="time">00:00</div>
+          </div>
+          <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:10px 0">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="downloadBtn" class="btn secondary" style="flex:1">Download Report</button>
+            <button id="resetBtn" class="btn secondary" style="flex:1">Restart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="footerFixed">
+  <div style="display:flex;gap:10px;align-items:center">
+    <div class="badgeSmall">Status: <span id="status">Locked</span></div>
+    <div class="badgeSmall">Hints: <span id="hints">0</span></div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <div class="badgeSmall">Final Score: <strong id="finalScore">0</strong></div>
+  </div>
+</div>
+
+<script>
+/* ------------------- CONFIG ------------------- */
+const GAME_CODE = "CYBER2025";        // change as needed
+const TOTAL_KEYS = 5;
+const QUESTIONS = [
+  { id:1, type:"text", q:"Decode (apply ROT13 then ROT7): ZOL WVIVTVM LU AOL QBLKLZ", a:"THE FUTURE OF THE JUDGES" },
+  { id:2, type:"choice", q:"I speak in 0s and 1s but dream in colors. Without me, your code is meaningless. What am I?", choices:["Interpreter","Compiler","Assembler","Linker"], a:"Compiler" },
+  { id:3, type:"text", q:"Fix the bug: what's the correct output of factorial(5)?\n(def factorial(n): if n==0: return 0 else: return n*factorial(n-1))", a:"120" },
+  { id:4, type:"text", q:"Binary puzzle: What is binary 1010 in decimal?", a:"10" },
+  { id:5, type:"text", q:"Shortcut key for copy on Windows (write exactly):", a:"CTRL+C" }
+];
+/* ------------------- STATE ------------------- */
+let state = {
+  unlocked:false,
+  posIndex:0,          // 0..TOTAL_KEYS-1 stops
+  keys:0,
+  score:0,
+  moves:0,
+  hints:0,
+  startTime:null,
+  timerId:null
+};
+/* ------------------- UI refs ------------------- */
+const $ = id => document.getElementById(id);
+const character = $("character");
+const bar = $("bar");
+const statusEl = $("status");
+const scoreEl = $("score");
+const keysEl = $("keys");
+const popup = $("popup");
+const qTitle = $("qTitle");
+const qText = $("qText");
+const qInput = $("qInput");
+const submitBtn = $("submitBtn");
+const closeBtn = $("closeBtn");
+const popupMsg = $("popupMsg");
+const previewText = $("previewText");
+const timeEl = $("time");
+const hintsEl = $("hints");
+const finalScoreEl = $("finalScore");
+const keysShelf = $("keysShelf");
+
+/* ------------------- UTILS ------------------- */
+function updateHUD(){
+  scoreEl.textContent = state.score;
+  keysEl.textContent = state.keys + "/" + TOTAL_KEYS;
+  bar.style.width = (state.keys / TOTAL_KEYS * 100) + "%";
+  statusEl.textContent = state.unlocked ? `Stage ${state.posIndex+1}` : "Locked";
+  hintsEl.textContent = state.hints;
+  finalScoreEl.textContent = state.score;
+}
+function startTimer(){
+  if(state.startTime) return;
+  state.startTime = Date.now();
+  state.timerId = setInterval(()=>{
+    const s = Math.floor((Date.now() - state.startTime)/1000);
+    const mm = String(Math.floor(s/60)).padStart(2,"0");
+    const ss = String(s%60).padStart(2,"0");
+    timeEl.textContent = `${mm}:${ss}`;
+  },400);
+}
+function stopTimer(){
+  if(state.timerId) { clearInterval(state.timerId); state.timerId=null; }
+}
+
+/* ------------------- GATE ------------------- */
+document.getElementById("enterGateBtn").addEventListener("click", ()=>{
+  const code = prompt("Enter Game Code:");
+  if(!code) return;
+  if(code.trim().toUpperCase() === GAME_CODE.toUpperCase()){
+    state.unlocked = true;
+    statusEl.textContent = "Ready";
+    alert("Access granted. Use Move / Interact to start walking.");
+    startTimer();
+    updateHUD();
+  } else {
+    alert("Access denied. Ask host for the code.");
+  }
+});
+
+/* ------------------- MOVE / INTERACT ------------------- */
+document.getElementById("moveBtn").addEventListener("click", ()=>{
+  if(!state.unlocked){ alert("Please enter game code first."); return; }
+  // if finished
+  if(state.keys >= TOTAL_KEYS){
+    alert("You already collected all keys. View your report or download it.");
+    return;
+  }
+  // move character visually
+  state.posIndex = Math.min(TOTAL_KEYS-1, state.posIndex + 1);
+  const leftPct = 6 + state.posIndex * (84 / (TOTAL_KEYS)); // approximate
+  character.style.left = leftPct + "%";
+  state.moves++;
+  updateHUD();
+  // after move show question for this stage (index)
+  setTimeout(()=>showQuestion(state.posIndex), 900);
+});
+
+/* ------------------- SHOW QUESTION ------------------- */
+function showQuestion(index){
+  const q = QUESTIONS[index];
+  qTitle.textContent = `Challenge ${index+1}`;
+  qText.textContent = q.q;
+  popupMsg.textContent = "";
+  if(q.type === "choice"){
+    // create select
+    qInput.value = "";
+    qInput.outerHTML = `<select id="qInput">${q.choices.map(c=>`<option value="">-- select --</option>`).join('')}</select>`;
+    const sel = $("qInput");
+    sel.innerHTML = q.choices.map(c=>`<option>${c}</option>`).join("");
+  } else {
+    // text input
+    qInput.outerHTML = `<input id="qInput" placeholder="Type your answer here">`;
+    $("qInput").value = "";
+  }
+  popup.classList.remove("hidden");
+}
+
+/* ------------------- SUBMIT / CHECK ------------------- */
+submitBtn.addEventListener("click", ()=>{
+  const idx = state.posIndex;
+  const q = QUESTIONS[idx];
+  const raw = $("qInput").value || "";
+  const ans = raw.trim().toUpperCase();
+  if(!ans){ popupMsg.textContent = "Please enter an answer."; return; }
+  // check correctness
+  if(ans === q.a.toUpperCase()){
+    // success: award key, points
+    state.keys++;
+    state.score += 10;
+    popupMsg.innerHTML = `<span style="color:var(--ok)">Correct! Key obtained 🎉</span>`;
+    renderKey(state.keys);
+    popup.classList.add("hidden");
+    updatePreview();
+    updateHUD();
+    if(state.keys >= TOTAL_KEYS){
+      finishGame();
+    } else {
+      setTimeout(()=>{ alert("Proceed to the next move to continue."); }, 350);
+    }
+  } else {
+    state.score = Math.max(0, state.score - 1);
+    popupMsg.innerHTML = `<span style="color:var(--warn)">Incorrect. Try again.</span>`;
+    updateHUD();
+  }
+});
+
+closeBtn.addEventListener("click", ()=> popup.classList.add("hidden"));
+
+/* ------------------- HINTS ------------------- */
+document.getElementById("hintBtn").addEventListener("click", ()=>{
+  if(!state.unlocked){ alert("Unlock the gate first"); return; }
+  if(state.keys >= TOTAL_KEYS){ alert("No hints needed — you finished!"); return; }
+  const idx = state.posIndex;
+  const q = QUESTIONS[idx];
+  const confirmed = confirm("Use hint? This costs -2 points.");
+  if(!confirmed) return;
+  state.hints++; state.score = Math.max(0, state.score - 2);
+  let hintText = "Think about basic transformations.";
+  // simple tailored hints
+  if(q.id === 1) hintText = "Apply ROT13, then ROT7. Keep spaces.";
+  if(q.id === 2) hintText = "It translates high-level code to machine/binary before running.";
+  if(q.id === 3) hintText = "Recursion base case should return 1 for factorial.";
+  if(q.id === 4) hintText = "Binary 1010 is 8+2.";
+  if(q.id === 5) hintText = "Common Windows keyboard shortcut (Control + ?).";
+  popupMsg.innerHTML = `<span style="color:var(--muted)">${hintText}</span>`;
+  updateHUD();
+});
+
+/* ------------------- KEYS VISUAL ------------------- */
+function renderKey(count){
+  keysShelf.innerHTML = "";
+  for(let i=0;i<count;i++){
+    const el = document.createElement("span");
+    el.className = "keyIcon";
+    el.textContent = "KEY";
+    keysShelf.appendChild(el);
+  }
+}
+
+/* ------------------- PREVIEW / REPORT ------------------- */
+function updatePreview(){
+  previewText.textContent = `Keys collected: ${state.keys}/${TOTAL_KEYS}. Score: ${state.score}. Moves: ${state.moves}. Hints: ${state.hints}.`;
+}
+
+/* ------------------- FINISH / REPORT GENERATION ------------------- */
+function finishGame(){
+  stopTimer();
+  statusEl.textContent = "Escaped!";
+  // lightweight analysis - personalize
+  const secs = Math.floor((Date.now() - state.startTime)/1000);
+  const logicRating = state.score >= 40 ? "Excellent" : state.score >= 30 ? "Strong" : "Developing";
+  const debugRating = state.moves <= (TOTAL_KEYS*2) ? "Fast & Accurate" : "Needs practice";
+  const tip = [
+    "Explain your approach before coding in interviews.",
+    "Practice tracing code by hand to speed debugging.",
+    "Learn common ciphers (ROT, Base64) & practice.",
+    "Timebox problems: move if stuck for 90 seconds."
+  ][(state.hints + state.moves + secs) % 4];
+
+  const report = {
+    name: prompt("Enter your name for the report (optional):") || "Anonymous",
+    score: state.score,
+    keys: state.keys,
+    time: timeEl.textContent,
+    moves: state.moves,
+    hints: state.hints,
+    strengths: {logic:logicRating,debug:debugRating},
+    tip
+  };
+
+  // show report preview nicely
+  previewText.innerHTML = `
+    <strong>${report.name}</strong><br>
+    Final Score: <strong>${report.score}</strong> · Time: <strong>${report.time}</strong><br>
+    Keys collected: ${report.keys} · Moves: ${report.moves} · Hints used: ${report.hints}<br>
+    <h4 style="margin:8px 0 4px">Strengths</h4>
+    Logic: ${report.strengths.logic} · Debugging: ${report.strengths.debug}
+    <h4 style="margin:8px 0 4px">Personal Tip</h4>
+    <em>${report.tip}</em>
+    <div style="margin-top:10px;color:var(--muted)">You can download the full report as a text file.</div>
+  `;
+  // store final report for download
+  window._finalReport = report;
+  updateHUD();
+  alert("🎉 Vault opened! Your secret report is ready in the lower panel. Use Download Report to save.");
+}
+
+/* ------------------- DOWNLOAD REPORT ------------------- */
+$("downloadBtn").addEventListener("click", ()=>{
+  const r = window._finalReport;
+  if(!r){ alert("Finish the game to generate your report."); return; }
+  const txt = [
+    `LogicShift — Secret Report`,
+    `Name: ${r.name}`,
+    `Score: ${r.score}`,
+    `Time: ${r.time}`,
+    `Keys: ${r.keys}`,
+    `Moves: ${r.moves}`,
+    `Hints used: ${r.hints}`,
+    ``,
+    `Strengths: Logic = ${r.strengths.logic}, Debugging = ${r.strengths.debug}`,
+    ``,
+    `Personal Tip: ${r.tip}`
+  ].join("\n");
+  const blob = new Blob([txt], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `LogicShift_report_${(r.name||'player').replace(/\s+/g,'_')}.txt`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+
+/* ------------------- RESET ------------------- */
+$("resetBtn").addEventListener("click", ()=> {
+  if(!confirm("Restart the game? Progress will be lost.")) return;
+  location.reload();
+});
+
+/* ------------------- INIT ------------------- */
+updateHUD();
+updatePreview();
+</script>
+</body>
+</html>
